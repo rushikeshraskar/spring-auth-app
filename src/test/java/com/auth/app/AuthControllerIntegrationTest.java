@@ -16,8 +16,6 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrlPattern;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -76,7 +74,7 @@ public class AuthControllerIntegrationTest {
                 .param("email", "another@example.com")
                 .param("password", "password123"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("auth/signup"));
+                .andExpect(view().name("auth/signup"));
     }
 
     @Test
@@ -86,7 +84,7 @@ public class AuthControllerIntegrationTest {
                 .param("email", "test@example.com")
                 .param("password", "password123"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("auth/signup"));
+                .andExpect(view().name("auth/signup"));
     }
 
     @Test
@@ -104,7 +102,7 @@ public class AuthControllerIntegrationTest {
                 .param("username", "testuser")
                 .param("password", "wrongpassword"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("auth/login"));
+                .andExpect(view().name("auth/login"));
     }
 
     @Test
@@ -113,7 +111,7 @@ public class AuthControllerIntegrationTest {
                 .param("username", "nonexistentuser")
                 .param("password", "password123"))
                 .andExpect(status().isOk())
-                .andExpect(forwardedUrl("auth/login"));
+                .andExpect(view().name("auth/login"));
     }
 
     @Test
