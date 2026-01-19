@@ -33,6 +33,19 @@ docker-compose up -d
 
 The application will be available at `http://localhost:8080`
 
+**Fresh Build and Clean Restart:**
+
+To do a clean build with no cache and remove all volumes before starting:
+
+```bash
+docker-compose down -v ; docker-compose build --no-cache ; docker-compose up -d
+```
+
+This command:
+- Stops all containers and removes volumes (`down -v`)
+- Rebuilds all images without cache (`build --no-cache`)
+- Starts all services in detached mode (`up -d`)
+
 **Credentials:**
 - MSSQL SA Username: `sa`
 - MSSQL SA Password: `testPassword123`
