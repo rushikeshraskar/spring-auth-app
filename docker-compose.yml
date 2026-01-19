@@ -9,12 +9,19 @@ services:
       - "1433:1433"
     volumes:
       - mssql_data:/var/opt/mssql
+      - ./init.sql:/var/opt/mssql/scripts/init.sql
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P testPassword123 -Q 'SELECT 1' -C || exit 1"]
       interval: 10s
       timeout: 30s
       retries: 10
       start_period: 60s
+    entrypoint: >
+      sh -c 'cp /var/opt/mssql/scripts/init.sql /tmp/init.sql &&
+      /opt/mssql/bin/sqlservr &
+      sleep 5 &&
+      /opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P testPassword123 -i /tmp/init.sql -C &&
+      wait'
 
   spring-auth-app:
     build: .
