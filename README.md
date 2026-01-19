@@ -211,6 +211,52 @@ mvn test -Dtest=AuthControllerIntegrationTest
 mvn test -Dtest=AuthServiceIntegrationTest
 ```
 
+## Jenkins & GitHub Webhook Setup
+
+### Exposing Local Jenkins with LocalTunnel
+
+When using Docker Jenkins on your PC, the local IP cannot be accessed from outside (e.g., GitHub webhooks). Use **LocalTunnel** to expose Jenkins publicly:
+
+#### Prerequisites
+- Node.js and npm installed
+- To install Node.js on Windows, use [nvm-windows](https://github.com/coreybutler/nvm-windows/blob/master/README.md)
+
+#### Setup LocalTunnel
+
+1. **Install LocalTunnel globally:**
+```bash
+npm install -g localtunnel
+```
+
+2. **Expose Jenkins (running on port 8081):**
+```bash
+lt --port 8081
+```
+
+This will output a public URL like: `https://xxxx-xx-xxx-xxx-xx.loca.lt`
+
+3. **Configure GitHub Webhook:**
+   - Go to your GitHub repository → **Settings** → **Webhooks**
+   - Click **Add webhook**
+   - **Payload URL:** `https://xxxx-xx-xxx-xxx-xx.loca.lt/github-webhook/`
+   - **Content type:** `application/json`
+   - **Events:** Select `Just the push event`
+   - Click **Add webhook**
+
+4. **Configure Jenkinsfile:**
+   - Ensure your Jenkinsfile has the GitHub trigger:
+   ```groovy
+   triggers {
+       githubPush()
+   }
+   ```
+
+5. **Enable GitHub Plugin in Jenkins:**
+   - Jenkins Dashboard → **Manage Jenkins** → **Manage Plugins**
+   - Search for and install **GitHub Plugin** if not present
+
+Now commits to your GitHub repository will automatically trigger the Jenkins pipeline!
+
 ## Technologies
 
 - **Framework**: Spring Boot 3.2.2
