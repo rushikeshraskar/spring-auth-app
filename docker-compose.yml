@@ -1,54 +1,43 @@
-version: '3.8'
-
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: auth_postgres
-    environment:
-      POSTGRES_DB: authdb
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   mssql:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: auth_mssql
+    container_name: mssql
     environment:
-      SA_PASSWORD: "YourPassword123!"
+      SA_PASSWORD: "testPassword123"
       ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
     volumes:
       - mssql_data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourPassword123! -Q 'SELECT 1'"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S 127.0.0.1 -U sa -P testPassword123 -Q 'SELECT 1' -C || exit 1"]
       interval: 10s
-      timeout: 5s
-      retries: 5
+      timeout: 30s
+      retries: 10
+      start_period: 60s
 
   spring-auth-app:
     build: .
     container_name: spring_auth_app
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/authdb
-      SPRING_DATASOURCE_USERNAME: postgres
-      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_DATASOURCE_URL: jdbc:sqlserver://mssql:1433;databaseName=authdb;encrypt=false;trustServerCertificate=true
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD: testPassword123
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.microsoft.sqlserver.jdbc.SQLServerDriver
+      spring.datasource.url: jdbc:sqlserver://mssql:1433;databaseName=authdb;encrypt=true;trustServerCertificate=true;
+      spring.datasource.jdbc-url: jdbc:sqlserver://mssql:1433;databaseName=authdb;encrypt=true;trustServerCertificate=true;
+      spring.datasource.username: sa
+      spring.datasource.password: testPassword123
+      spring.datasource.driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+
     ports:
       - "8080:8080"
     depends_on:
-      postgres:
+      mssql:
         condition: service_healthy
+    entrypoint: >
+      sh -c 'java -jar app.jar'
     restart: unless-stopped
 
 volumes:
-  postgres_data:
   mssql_data:

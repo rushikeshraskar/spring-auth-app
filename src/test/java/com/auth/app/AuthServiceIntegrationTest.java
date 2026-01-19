@@ -1,7 +1,9 @@
 package com.auth.app;
 
 import com.auth.app.entity.User;
+import com.auth.app.repository.UserRepository;
 import com.auth.app.service.AuthService;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -10,10 +12,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@org.springframework.test.context.ActiveProfiles("test")
 public class AuthServiceIntegrationTest {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @AfterEach
+    public void tearDown() {
+        // Clear all users after each test
+        userRepository.deleteAll();
+    }
 
     @Test
     public void testSignUpSuccess() {
@@ -69,5 +81,47 @@ public class AuthServiceIntegrationTest {
 
         assertThat(isValid).isTrue();
         assertThat(isInvalid).isFalse();
+    }
+
+    @Test
+    public void testSignUpWithInvalidUsername() {
+        assertThatThrownBy(() -> authService.signUp("ab", "test@example.com", "password123"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("at least");
+    }
+
+    @Test
+    public void testSignUpWithInvalidEmail() {
+        assertThatThrownBy(() -> authService.signUp("validuser", "notanemail", "password123"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Invalid email");
+    }
+
+    @Test
+    public void testSignUpWithShortPassword() {
+        assertThatThrownBy(() -> authService.signUp("validuser", "test@example.com", "short"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("at least");
+    }
+
+    @Test
+    public void testSignUpWithEmptyUsername() {
+        assertThatThrownBy(() -> authService.signUp("", "test@example.com", "password123"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("empty");
+    }
+
+    @Test
+    public void testSignUpWithEmptyEmail() {
+        assertThatThrownBy(() -> authService.signUp("validuser", "", "password123"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("empty");
+    }
+
+    @Test
+    public void testSignUpWithEmptyPassword() {
+        assertThatThrownBy(() -> authService.signUp("validuser", "test@example.com", ""))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("empty");
     }
 }

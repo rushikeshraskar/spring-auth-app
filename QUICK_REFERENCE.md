@@ -269,7 +269,7 @@ logging.level.com.auth.app=DEBUG
 psql -h localhost -U postgres -d authdb -c "SELECT * FROM users;"
 
 # MSSQL
-sqlcmd -S localhost -U sa -P YourPassword123! -Q "SELECT * FROM users;"
+sqlcmd -S localhost -U sa -P testPassword123 -Q "SELECT * FROM users;"
 ```
 
 ### View Session in Browser

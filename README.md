@@ -64,7 +64,7 @@ CREATE DATABASE authdb;
 ```properties
 spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=authdb
 spring.datasource.username=sa
-spring.datasource.password=YourPassword123!
+spring.datasource.password=testPassword123
 ```
 
 ## Building and Running

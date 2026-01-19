@@ -25,8 +25,10 @@ public class User {
     private String password;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean enabled = true;
 
     @Column(nullable = false, updatable = false)
+    @Builder.Default
     private Long createdAt = System.currentTimeMillis();
 }

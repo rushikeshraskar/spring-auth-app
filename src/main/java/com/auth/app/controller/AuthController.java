@@ -33,7 +33,17 @@ public class AuthController {
                         @RequestParam String password,
                         HttpSession session,
                         Model model) {
-        Optional<User> user = authService.findByUsername(username);
+        // Validate inputs
+        if (username == null || username.trim().isEmpty()) {
+            model.addAttribute("error", "Username is required");
+            return "auth/login";
+        }
+        if (password == null || password.isEmpty()) {
+            model.addAttribute("error", "Password is required");
+            return "auth/login";
+        }
+        
+        Optional<User> user = authService.findByUsername(username.trim());
 
         if (user.isPresent() && authService.validatePassword(password, user.get().getPassword())) {
             session.setAttribute("userId", user.get().getId());
@@ -57,8 +67,7 @@ public class AuthController {
                          Model model) {
         try {
             authService.signUp(username, email, password);
-            model.addAttribute("success", "Account created successfully! Please login.");
-            return "auth/login";
+            return "redirect:/login";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
             return "auth/signup";
