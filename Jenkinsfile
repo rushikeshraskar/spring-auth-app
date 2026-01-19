@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+    
     options {
         timestamps()
         timeout(time: 1, unit: 'HOURS')
