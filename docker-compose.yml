@@ -46,5 +46,21 @@ services:
       sh -c 'java -jar app.jar'
     restart: unless-stopped
 
+  jenkins:
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
+    container_name: jenkins
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      JAVA_OPTS: "-Xmx512m -Xms512m"
+    restart: unless-stopped
+
 volumes:
   mssql_data:
+  jenkins_home:

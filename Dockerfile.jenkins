@@ -1,0 +1,24 @@
+FROM jenkins/jenkins:latest
+
+USER root
+
+# Install Maven
+RUN apt-get update && apt-get install -y maven git && rm -rf /var/lib/apt/lists/*
+
+# Install required Jenkins plugins
+RUN jenkins-plugin-cli --plugins \
+    git \
+    github \
+    github-branch-source \
+    pipeline-github \
+    maven-plugin \
+    junit \
+    pipeline-model-definition \
+    pipeline-stage-view
+
+USER jenkins
+
+# Set timezone (optional)
+ENV TZ=UTC
+
+EXPOSE 8080 50000
