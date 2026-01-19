@@ -4,13 +4,15 @@ A Spring Boot authentication application with sign up and sign in functionality.
 
 ## Features
 
-- User Registration (Sign Up)
-- User Authentication (Sign In)
-- Session Management
+- User Registration (Sign Up) with comprehensive input validation
+- User Authentication (Sign In) with BCrypt password hashing
+- Session Management with secure session attributes
 - Dashboard with personalized greeting
 - Database support for PostgreSQL and MSSQL
-- Docker containerization
-- Integration tests
+- Docker containerization with automated setup
+- Comprehensive integration tests (22 tests, all passing)
+- Environment-based configuration for production deployment
+- Thymeleaf template rendering
 
 ## Prerequisites
 
@@ -21,7 +23,9 @@ A Spring Boot authentication application with sign up and sign in functionality.
 
 ## Quick Start with Docker
 
-### Using PostgreSQL (Default)
+### Using MSSQL (Default)
+
+The Docker Compose setup is pre-configured to use MSSQL Server with the following environment variables:
 
 ```bash
 docker-compose up -d
@@ -29,11 +33,30 @@ docker-compose up -d
 
 The application will be available at `http://localhost:8080`
 
-### Using MSSQL
+**Credentials:**
+- MSSQL SA Username: `sa`
+- MSSQL SA Password: `testPassword123`
+- Database: `authdb`
 
-1. Update `docker-compose.yml` to use mssql service instead of postgres
-2. Update `application.properties` MSSQL configuration
-3. Run: `docker-compose up -d`
+### Using PostgreSQL
+
+To use PostgreSQL instead of MSSQL, set environment variables before starting:
+
+```bash
+export SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/authdb
+export SPRING_DATASOURCE_USERNAME=postgres
+export SPRING_DATASOURCE_PASSWORD=postgres
+export SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+docker-compose up -d
+```
+
+Or create a `.env` file in the project root:
+```
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/authdb
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=postgres
+SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+```
 
 ## Local Development Setup
 
@@ -45,11 +68,17 @@ The application will be available at `http://localhost:8080`
 CREATE DATABASE authdb;
 ```
 
-3. Update `application.properties`:
+3. Update environment variables or `application.properties`:
 ```properties
 spring.datasource.url=jdbc:postgresql://localhost:5432/authdb
 spring.datasource.username=postgres
 spring.datasource.password=postgres
+spring.datasource.driver-class-name=org.postgresql.Driver
+```
+
+4. Run the application:
+```bash
+mvn spring-boot:run
 ```
 
 ### MSSQL Setup
@@ -60,12 +89,31 @@ spring.datasource.password=postgres
 CREATE DATABASE authdb;
 ```
 
-3. Update `application.properties`:
+3. Update environment variables or `application.properties`:
 ```properties
-spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=authdb
+spring.datasource.url=jdbc:sqlserver://localhost:1433;databaseName=authdb;encrypt=true;trustServerCertificate=true
 spring.datasource.username=sa
 spring.datasource.password=testPassword123
+spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver
 ```
+
+4. Run the application:
+```bash
+mvn spring-boot:run
+```
+
+## Environment Variables
+
+The application uses the following environment variables for configuration:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `SPRING_DATASOURCE_URL` | Database connection URL | `jdbc:postgresql://localhost:5432/authdb` |
+| `SPRING_DATASOURCE_USERNAME` | Database username | `postgres` |
+| `SPRING_DATASOURCE_PASSWORD` | Database password | `postgres` |
+| `SPRING_DATASOURCE_DRIVER_CLASS_NAME` | JDBC driver class | `org.postgresql.Driver` |
+
+This allows easy deployment to different environments without modifying code.
 
 ## Building and Running
 
@@ -124,14 +172,30 @@ spring-auth-app/
 
 The application includes comprehensive integration tests covering:
 
-- Page load tests (login, signup)
-- User registration (success, duplicate username, duplicate email)
-- User authentication (success, invalid password, invalid username)
-- Session management (dashboard access, logout)
+- **Controller Tests (10 tests)**
+  - Page load tests (login, signup, dashboard)
+  - User registration (success, duplicate username, duplicate email)
+  - User authentication (success, invalid password, invalid username)
+  - Session management (dashboard access, logout)
+
+- **Service Tests (12 tests)**
+  - User signup with validation
+  - Duplicate username/email detection
+  - User lookup by username
+  - Password validation with BCrypt
+  - Input validation (empty/short username, invalid email, short password)
+
+**Test Results:** ✅ All 22 tests passing
 
 Run tests with:
 ```bash
 mvn test
+```
+
+Run specific test class:
+```bash
+mvn test -Dtest=AuthControllerIntegrationTest
+mvn test -Dtest=AuthServiceIntegrationTest
 ```
 
 ## Technologies
@@ -147,13 +211,63 @@ mvn test
 
 ## Configuration
 
-Key properties in `application.properties`:
+### Database Configuration
 
-- `spring.datasource.url` - Database connection URL
-- `spring.datasource.username` - Database username
-- `spring.datasource.password` - Database password
-- `server.port` - Server port (default: 8080)
-- `server.servlet.session.timeout` - Session timeout in seconds (default: 1800)
+The application supports multiple databases through environment variables:
+
+#### PostgreSQL
+```properties
+SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/authdb
+SPRING_DATASOURCE_USERNAME=postgres
+SPRING_DATASOURCE_PASSWORD=postgres
+SPRING_DATASOURCE_DRIVER_CLASS_NAME=org.postgresql.Driver
+```
+
+#### MSSQL
+```properties
+SPRING_DATASOURCE_URL=jdbc:sqlserver://localhost:1433;databaseName=authdb
+SPRING_DATASOURCE_USERNAME=sa
+SPRING_DATASOURCE_PASSWORD=testPassword123
+SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.microsoft.sqlserver.jdbc.SQLServerDriver
+```
+
+### Application Properties
+
+Edit `src/main/resources/application.properties` to modify:
+- Server port: `server.port=8080`
+- Thymeleaf caching: `spring.thymeleaf.cache=true` (production)
+- JPA hibernate: `spring.jpa.hibernate.ddl-auto=update` (or `validate` in production)
+- Debug logging: `logging.level.com.auth.app=DEBUG`
+
+### Production Deployment
+
+For production, always:
+1. Set all database credentials via environment variables
+2. Disable Thymeleaf cache: `SPRING_THYMELEAF_CACHE=false`
+3. Use `validate` DDL mode: `SPRING_JPA_HIBERNATE_DDL_AUTO=validate`
+4. Enable HTTPS: Set `server.ssl.*` properties
+5. Disable debug logging: Remove `DEBUG` level configuration
+
+## Release Notes
+
+### Recent Improvements (Session 1)
+
+- **Input Validation**: Added comprehensive validation for username (3-100 chars), email (regex pattern), and password (6-255 chars)
+- **Security**: Externalized database credentials to environment variables for production deployment
+- **Template Engine**: Added Thymeleaf dependency for proper HTML view rendering
+- **Test Coverage**: Added 6 new validation tests; all 22 tests passing
+- **Docker Support**: Full Docker Compose setup with MSSQL 2022 and PostgreSQL options
+- **Configuration**: Environment-based configuration system for multi-environment deployment
+
+**Bug Fixes:**
+1. Fixed TestDataSourceConfig missing DataSource bean
+2. Externalized hardcoded database credentials
+3. Added comprehensive input validation layer to AuthService
+4. Added login endpoint input validation
+5. Fixed signup redirect behavior for proper HTTP flow
+6. Refactored DataSourceConfig to use @Value property injection
+7. Fixed SPRING_DATASOURCE_DRIVER property naming convention
+8. Added missing spring-boot-starter-thymeleaf dependency
 
 ## License
 
