@@ -124,4 +124,28 @@ public class AuthServiceIntegrationTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("empty");
     }
+
+    @Test
+    public void testSignUpWithDescription() {
+        User user = authService.signUp("desctest", "desctest@example.com", "password123", "Test description");
+
+        assertThat(user).isNotNull();
+        assertThat(user.getDescription()).isEqualTo("Test description");
+    }
+
+    @Test
+    public void testSignUpWithNullDescription() {
+        User user = authService.signUp("nulltest", "nulltest@example.com", "password123", null);
+
+        assertThat(user).isNotNull();
+        assertThat(user.getDescription()).isNull();
+    }
+
+    @Test
+    public void testSignUpWithEmptyDescription() {
+        User user = authService.signUp("emptytest", "emptytest@example.com", "password123", "");
+
+        assertThat(user).isNotNull();
+        assertThat(user.getDescription()).isEqualTo("");
+    }
 }

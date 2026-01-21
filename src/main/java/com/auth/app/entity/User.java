@@ -28,6 +28,9 @@ public class User {
     @Builder.Default
     private Boolean enabled = true;
 
+    @Column(length = 500)
+    private String description;
+
     @Column(nullable = false, updatable = false)
     @Builder.Default
     private Long createdAt = System.currentTimeMillis();

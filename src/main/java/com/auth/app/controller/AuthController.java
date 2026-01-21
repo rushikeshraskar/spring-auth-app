@@ -64,9 +64,10 @@ public class AuthController {
     public String signup(@RequestParam String username,
                          @RequestParam String email,
                          @RequestParam String password,
+                         @RequestParam(required = false) String description,
                          Model model) {
         try {
-            authService.signUp(username, email, password);
+            authService.signUp(username, email, password, description);
             return "redirect:/login";
         } catch (IllegalArgumentException e) {
             model.addAttribute("error", e.getMessage());
@@ -80,8 +81,51 @@ public class AuthController {
         if (username == null) {
             return "redirect:/login";
         }
-        model.addAttribute("username", username);
+        Optional<User> user = authService.findByUsername(username);
+        if (user.isPresent()) {
+            model.addAttribute("username", username);
+            model.addAttribute("description", user.get().getDescription());
+        }
         return "dashboard";
+    }
+
+    @GetMapping("/settings")
+    public String settingsPage(HttpSession session, Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+        Optional<User> user = authService.findByUsername(username);
+        if (user.isPresent()) {
+            model.addAttribute("description", user.get().getDescription());
+        } else {
+            model.addAttribute("error", "User not found");
+        }
+        return "auth/settings";
+    }
+
+    @PostMapping("/settings")
+    public String saveSettings(@RequestParam String description,
+                               HttpSession session,
+                               Model model) {
+        String username = (String) session.getAttribute("username");
+        if (username == null) {
+            return "redirect:/login";
+        }
+        try {
+            Optional<User> user = authService.findByUsername(username);
+            if (user.isPresent()) {
+                user.get().setDescription(description);
+                authService.saveUser(user.get());
+            } else {
+                model.addAttribute("error", "User not found");
+                return "auth/settings";
+            }
+        } catch (IllegalArgumentException e) {
+            model.addAttribute("error", e.getMessage());
+            return "auth/settings";
+        }
+        return "redirect:/dashboard";
     }
 
     @GetMapping("/logout")

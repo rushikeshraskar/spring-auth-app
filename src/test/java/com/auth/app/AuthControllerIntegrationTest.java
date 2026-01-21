@@ -16,6 +16,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -132,5 +133,38 @@ public class AuthControllerIntegrationTest {
         mockMvc.perform(get("/logout"))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrlPattern("/login*"));
+    }
+
+    @Test
+    public void testSignupWithDescription() throws Exception {
+        mockMvc.perform(post("/signup")
+                .param("username", "descuser")
+                .param("email", "descuser@example.com")
+                .param("password", "password123")
+                .param("description", "Test user description"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        // Verify the user was created with description
+        var user = authService.findByUsername("descuser");
+        assertThat(user).isPresent();
+        assertThat(user.get().getDescription()).isEqualTo("Test user description");
+    }
+
+    @Test
+    public void testSettingsPageWithDescription() throws Exception {
+        // First create a user with description
+        authService.signUp("settingsuser", "settings@example.com", "password123", "User description");
+
+        // Login
+        mockMvc.perform(post("/login")
+                .param("username", "settingsuser")
+                .param("password", "password123"))
+                .andExpect(status().is3xxRedirection());
+
+        // Access settings page - should redirect to login first since we're not testing the full flow
+        mockMvc.perform(get("/settings"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
     }
 }

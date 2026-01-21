@@ -26,6 +26,10 @@ public class AuthService {
     private static final int MAX_EMAIL_LENGTH = 255;
 
     public User signUp(String username, String email, String password) {
+        return signUp(username, email, password, null);
+    }
+    
+    public User signUp(String username, String email, String password, String description) {
         // Validate inputs
         validateUsername(username);
         validateEmail(email);
@@ -42,6 +46,7 @@ public class AuthService {
                 .username(username.trim())
                 .email(email.trim())
                 .password(passwordEncoder.encode(password))
+                .description(description)
                 .enabled(true)
                 .build();
 
@@ -57,6 +62,10 @@ public class AuthService {
 
     public boolean validatePassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
+    }
+    
+    public User saveUser(User user) {
+        return userRepository.save(user);
     }
     
     private void validateUsername(String username) {
