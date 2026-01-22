@@ -22,16 +22,16 @@ echo "📌 Checking out base branch: $BASE_BRANCH"
 git checkout $BASE_BRANCH
 git pull origin $BASE_BRANCH
 
-# Check if remote branch already exists
-if git show-ref --verify --quiet refs/remotes/origin/$NEW_BRANCH; then
-  echo "❌ Branch already exists on origin: $NEW_BRANCH"
-  exit 1
-fi
-
 # Delete local leftover branch
 if git show-ref --verify --quiet refs/heads/$NEW_BRANCH; then
   echo "⚠️ Local branch exists, deleting: $NEW_BRANCH"
   git branch -D $NEW_BRANCH
+fi
+
+# Check if remote branch already exists
+if git show-ref --verify --quiet refs/remotes/origin/$NEW_BRANCH; then
+  echo "❌ Branch already exists on origin: $NEW_BRANCH"
+  exit 1
 fi
 
 echo "🌱 Creating new branch: $NEW_BRANCH"
