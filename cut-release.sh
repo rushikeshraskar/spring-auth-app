@@ -30,9 +30,10 @@ fi
 
 # Check if remote branch already exists
 if git show-ref --verify --quiet refs/remotes/origin/$NEW_BRANCH; then
-  echo "❌ Branch already exists on origin: $NEW_BRANCH"
-  exit 1
+  echo "⚠️ Remote branch exists, deleting: $NEW_BRANCH"
+  git push origin --delete $NEW_BRANCH
 fi
+
 
 echo "🌱 Creating new branch: $NEW_BRANCH"
 git checkout -b $NEW_BRANCH
