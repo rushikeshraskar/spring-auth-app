@@ -101,10 +101,17 @@
         .signup-link a:hover {
             text-decoration: underline;
         }
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+            font-size: 18px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
+        <div class="welcome-message">Welcome to my test app 1</div>
         <h1>Sign In</h1>
 
         <div th:if="${error}" class="error" th:text="${error}"></div>
