@@ -167,4 +167,15 @@ public class AuthControllerIntegrationTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/login"));
     }
+
+    @Test
+    void testSignupSuccess() throws Exception {
+        mockMvc.perform(post("/signup")
+                .param("username", "testuser")
+                .param("email", "test@example.com")
+                .param("password", "password")
+                .param("confirmPassword", "password"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("auth/login"));
+    }
 }

@@ -76,15 +76,9 @@ public class AuthController {
     }
 
     @GetMapping("/dashboard")
-    public String dashboard(HttpSession session, Model model) {
-        String username = (String) session.getAttribute("username");
-        if (username == null) {
+    public String dashboard(HttpSession session) {
+        if (session.getAttribute("username") == null) {
             return "redirect:/login";
-        }
-        Optional<User> user = authService.findByUsername(username);
-        if (user.isPresent()) {
-            model.addAttribute("username", username);
-            model.addAttribute("description", user.get().getDescription());
         }
         return "dashboard";
     }

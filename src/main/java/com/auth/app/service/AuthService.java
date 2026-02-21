@@ -105,4 +105,11 @@ public class AuthService {
             throw new IllegalArgumentException("Password must not exceed " + MAX_PASSWORD_LENGTH + " characters");
         }
     }
+
+    public void signUp(User user) {
+        if (userRepository.findByUsername(user.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists");
+        }
+        userRepository.save(user);
+    }
 }
