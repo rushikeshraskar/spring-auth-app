@@ -30,8 +30,8 @@ stage('Cut Release Branch') {
         # Inject credentials into remote
         git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/rushikeshraskar/spring-auth-app.git
 
-        chmod +x scripts/cut-release.sh
-        ./scripts/cut-release.sh ${BASE_BRANCH} ${NEW_BRANCH}
+        chmod +x cut-release.sh
+        ./cut-release.sh ${BASE_BRANCH} ${NEW_BRANCH}
       '''
     }
   }
