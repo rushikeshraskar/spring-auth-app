@@ -27,10 +27,10 @@ if git show-ref --verify --quiet refs/heads/$NEW_BRANCH; then
 fi
 
 echo "📌 Checking out base branch: $BASE_BRANCH"
-git checkout $BASE_BRANCH
-git pull origin $BASE_BRANCH
+git checkout -B $BASE_BRANCH origin/$BASE_BRANCH
+git pull --rebase origin $BASE_BRANCH
 
-git remote prune origin
+#git remote prune origin
 
 echo "🌱 Creating new branch: $NEW_BRANCH"
 git checkout -b $NEW_BRANCH
