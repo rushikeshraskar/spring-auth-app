@@ -27,6 +27,7 @@ if git show-ref --verify --quiet refs/heads/$NEW_BRANCH; then
 fi
 
 echo "📌 Checking out base branch: $BASE_BRANCH"
+git stash
 git checkout -B $BASE_BRANCH origin/$BASE_BRANCH
 git pull --rebase origin $BASE_BRANCH
 
