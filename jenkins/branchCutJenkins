@@ -1,9 +1,15 @@
 pipeline {
-  agent any
+  agent {
+    node {
+      label 'WindowsNode'
+    }
+  }
 
   parameters {
     string(name: 'BASE_BRANCH', defaultValue: 'release-8.5.x', description: 'Base branch')
     string(name: 'NEW_BRANCH',  description: 'New branch to create (e.g. release-8.5.1)')
+    string(name: 'CURRENT_VERSION', description: 'Current version in pom.xml (e.g., 8.5.0)')
+    string(name: 'NEW_VERSION', description: 'New version to set in pom.xml (e.g., 8.5.1)')
   }
 
   stages {
@@ -23,15 +29,11 @@ stage('Cut Release Branch') {
       usernameVariable: 'GIT_USER',
       passwordVariable: 'GIT_TOKEN'
     )]) {
-      sh '''
+      bat '''
         git config user.name "jenkins"
         git config user.email "jenkins@ci.local"
-
-        # Inject credentials into remote
-        git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/rushikeshraskar/spring-auth-app.git
-
-        chmod +x cut-release.sh
-        ./cut-release.sh ${BASE_BRANCH} ${NEW_BRANCH}
+        git remote set-url origin https://%GIT_USER%:%GIT_TOKEN%@github.com/rushikeshraskar/spring-auth-app.git
+        call cut-release.bat %BASE_BRANCH% %NEW_BRANCH% %CURRENT_VERSION% %NEW_VERSION%
       '''
     }
   }
