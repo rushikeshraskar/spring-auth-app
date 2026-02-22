@@ -20,17 +20,17 @@ if ! git show-ref --verify --quiet refs/remotes/origin/$BASE_BRANCH; then
   exit 1
 fi
 
-echo "📌 Checking out base branch: $BASE_BRANCH"
-git checkout $BASE_BRANCH
-git pull origin $BASE_BRANCH
-
-git remote prune origin
-
 # Delete local leftover branch
 if git show-ref --verify --quiet refs/heads/$NEW_BRANCH; then
   echo "⚠️ Local branch exists, deleting: $NEW_BRANCH"
   git branch -D $NEW_BRANCH
 fi
+
+echo "📌 Checking out base branch: $BASE_BRANCH"
+git checkout $BASE_BRANCH
+git pull origin $BASE_BRANCH
+
+git remote prune origin
 
 echo "🌱 Creating new branch: $NEW_BRANCH"
 git checkout -b $NEW_BRANCH
