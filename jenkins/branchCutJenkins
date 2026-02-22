@@ -1,7 +1,7 @@
 pipeline {
   agent {
     node {
-      label 'windows'
+      label 'linux'
     }
   }
 
@@ -29,11 +29,15 @@ stage('Cut Release Branch') {
       usernameVariable: 'GIT_USER',
       passwordVariable: 'GIT_TOKEN'
     )]) {
-      bat '''
+      sh '''
         git config user.name "jenkins"
         git config user.email "jenkins@ci.local"
-        git remote set-url origin https://%GIT_USER%:%GIT_TOKEN%@github.com/rushikeshraskar/spring-auth-app.git
-        call scripts\\cut-release.bat %BASE_BRANCH% %NEW_BRANCH% %CURRENT_VERSION% %NEW_VERSION%
+
+        # Inject credentials into remote
+        git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/rushikeshraskar/spring-auth-app.git
+
+        chmod +x scripts/cut-release.sh
+        ./scripts/cut-release.sh ${BASE_BRANCH} ${NEW_BRANCH} ${CURRENT_VERSION} ${NEW_VERSION}
       '''
     }
   }
