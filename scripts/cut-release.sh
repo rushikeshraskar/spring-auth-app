@@ -35,9 +35,6 @@ fi
 echo "🌱 Creating new branch: $NEW_BRANCH"
 git checkout -b $NEW_BRANCH
 
-echo "🚀 Pushing branch to origin"
-git push origin $NEW_BRANCH
-
 if [ -n "$CURRENT_VERSION" ] && [ -n "$NEW_VERSION" ]; then
   echo "🔁 Replacing version occurrences in pom.xml files: $CURRENT_VERSION -> $NEW_VERSION"
 
@@ -46,7 +43,7 @@ if [ -n "$CURRENT_VERSION" ] && [ -n "$NEW_VERSION" ]; then
 
   modified=()
   for f in "${pom_files[@]}"; do
-    if grep -Iq -- "${CURRENT_VERSION}" "$f"; then
+    if grep -Fq "${CURRENT_VERSION}" "$f"; then
       perl -0777 -pe "s/\Q${CURRENT_VERSION}\E/${NEW_VERSION}/g" -i.bak "$f" || true
       rm -f "$f".bak
       git add "$f"
@@ -57,7 +54,7 @@ if [ -n "$CURRENT_VERSION" ] && [ -n "$NEW_VERSION" ]; then
   if [ ${#modified[@]} -eq 0 ]; then
     echo "⚠️ No pom.xml files contained $CURRENT_VERSION"
   else
-    git commit -m "chore(release): bump version ${CURRENT_VERSION} -> ${NEW_VERSION}" || true
+    git commit -m "chore(release): bump version ${CURRENT_VERSION} -> ${NEW_VERSION}"
     git push origin $NEW_BRANCH
     echo "✅ Updated ${#modified[@]} pom.xml file(s) and pushed: $NEW_VERSION"
   fi
