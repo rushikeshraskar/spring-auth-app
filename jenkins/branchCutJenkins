@@ -33,7 +33,7 @@ stage('Cut Release Branch') {
         git config user.name "jenkins"
         git config user.email "jenkins@ci.local"
         git remote set-url origin https://%GIT_USER%:%GIT_TOKEN%@github.com/rushikeshraskar/spring-auth-app.git
-        call cut-release.bat %BASE_BRANCH% %NEW_BRANCH% %CURRENT_VERSION% %NEW_VERSION%
+        call scripts\\cut-release.bat %BASE_BRANCH% %NEW_BRANCH% %CURRENT_VERSION% %NEW_VERSION%
       '''
     }
   }
